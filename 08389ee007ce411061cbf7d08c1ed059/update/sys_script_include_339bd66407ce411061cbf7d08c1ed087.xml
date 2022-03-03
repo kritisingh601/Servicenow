@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <active>false</active>
+        <api_name>x_758828_snc.SalesforceIntegration</api_name>
+        <caller_access/>
+        <client_callable>true</client_callable>
+        <description>Salesforce to Servicenow</description>
+        <name>SalesforceIntegration</name>
+        <script><![CDATA[var SalesforceIntegration = Class.create();
+SalesforceIntegration.prototype = {
+	
+	//Define Function for insert Record
+	createIncident: function(requestString)
+	{
+			gs.info('RequestString' +requestString);
+	var parser = new JSONParser();
+	var parsed = parser.parse(requestString);
+	var newCases = parsed["new"];
+	//if (newCases instanceOf Array) 
+	var newCase = newCases[0];
+	var caseNumber = newCase["CaseNumber"];
+	var prio = newCase["Priority"];
+	var status=newCase ["Status"];
+	var origin=newCase ["Origin"];
+	var shrtdis=newCase["Subject"];
+	var caller=newCase["OwnerId"];
+	var catgry=newCase["Type"];
+	var subcatgry=newCase["Reason"];
+	var desc=newCase["Description"];
+	var workNote=newCase["Comments"];
+	var id=newCase["Id"];
+   // var  id1=newCase["ParentId"];
+	
+
+	
+	//Inserting the data to the Incident table 
+	var gr=new GlideRecord("incident");
+	gr.initialize();
+	//gr.u_external_id=id1;
+	//gr.u_external_id=id;
+	gr.correlation_id=id;
+	gr.contact_type=origin;
+	//Set the priority value	
+	if(prio=='High')
+	{
+    gr.setValue("impact","1");
+	gr.setValue("urgency","1");
+	}
+		
+	else if(prio=='Medium')
+	{
+	gr.setValue("impact","2");
+	gr.setValue("urgency","2");
+    }
+		
+	else if(prio=='Low')
+	{
+    gr.setValue("impact","3");
+	gr.setValue("urgency","3");
+	}
+	gr.priority=prio;
+		
+	//Set the state value
+	if(status=='Working')
+		gr.setValue("state","2");
+		
+	else if(status=='Escalated')
+		gr.setValue("state","3");
+		
+	else if(status=="New")
+		gr.setValue("state","1");
+	gr.state=status;
+		
+	gr.short_description=shrtdis;
+	gr.caller_id=caller;
+	gr.category=catgry;
+	gr.subcategory=subcatgry;
+	gr.description=desc;
+	gr.work_notes=workNote;
+		
+	gr.insert();
+	},
+	
+	//Define Function For  Update Record
+	updateIncident: function(requestString)
+	{
+ gs.log("Update record" +requestString);
+                var parser = new JSONParser();
+                var parsed = parser.parse(requestString);
+                var newCases = parsed["new"];
+                var newCase = newCases[0];
+                var caseNumber = newCase["CaseNumber"];
+                var prio = newCase["Priority"];
+                var status=newCase ["Status"];
+                var origin=newCase ["Origin"];
+                var shrtDis=newCase["Subject"];
+                var caller=newCase["OwnerId"];
+                var catgry=newCase["Type"];
+                var subcatgry=newCase["Reason"];
+                var desc=newCase["Description"];
+                var workNote=newCase["Comments"];
+//for updation
+                var gr = new GlideRecord("incident");
+                gr.addQuery('correlation_id',caseNumber);
+                gr.query();
+                if(gr.next())
+                {
+                gr.correlation_id = caseNumber;
+                 	gr.contact_type=origin;
+	if(prio=='High')
+	{
+    gr.setValue("impact","1");
+	gr.setValue("urgency","1");
+	}
+		
+	else if(prio=='Medium')
+	{
+	gr.setValue("impact","2");
+	gr.setValue("urgency","2");
+    }
+		
+	else if(prio=='Low')
+	{
+    gr.setValue("impact","3");
+	gr.setValue("urgency","3");
+	}
+	gr.priority=prio;
+		
+	//Set the state value
+	if(status=='Working')
+		gr.setValue("state","2");
+		
+	else if(status=='Escalated')
+		gr.setValue("state","3");
+		
+	else if(status=="New")
+		gr.setValue("state","1");
+	//gr.priority=prio;
+
+	gr.state=status;
+	gr.short_description=shrtDis;
+	gr.caller_id=caller;
+	gr.category=catgry;
+	gr.subcategory=subcatgry;
+	gr.description=desc;
+	gr.work_notes=workNote;
+				
+				}			
+                                
+                gr.update();
+
+	},
+	
+ getCorrelationId: function(incidentSysId) {
+           var gr = new GlideRecord('incident');
+           gs.addInfoMessage('getCorrelationId for incident with sys_id: ' + incidentSysId);
+           gr.addQuery('sys_id', incidentSysId);
+           gr.query();
+          // gs.addInfoMessage('getCorrelationId - rows retrieved: ' +gr.getRowCount());
+           if(gr.next())
+                return gr.getValue('correlation_id');
+           else
+                return 'not found';
+     },
+
+	
+type: 'SalesforceIntegration'
+};]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2022-03-02 06:27:35</sys_created_on>
+        <sys_id>339bd66407ce411061cbf7d08c1ed087</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_name>SalesforceIntegration</sys_name>
+        <sys_package display_value="ServiceNow to Salesforce Integration" source="x_758828_snc">08389ee007ce411061cbf7d08c1ed059</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="ServiceNow to Salesforce Integration">08389ee007ce411061cbf7d08c1ed059</sys_scope>
+        <sys_update_name>sys_script_include_339bd66407ce411061cbf7d08c1ed087</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2022-03-03 10:22:55</sys_updated_on>
+    </sys_script_include>
+</record_update>
